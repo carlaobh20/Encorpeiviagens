@@ -14,9 +14,8 @@ export const FREQUENCIES = [
   { value: "1d", label: "Diário" },
 ];
 
-// Regras de geração de alerta (usadas pelo worker)
 export const ALERT_RULES = {
-  PRICE_DROP_PCT: 30,      // queda mínima para alertar
-  BELOW_AVG_PCT: 25,       // % abaixo da média para considerar oportunidade
-  RARE_SCORE: 85,          // Smart Score acima disso = oportunidade rara
+  PRICE_DROP_PCT: 30,
+  BELOW_AVG_PCT: 20,
+  RARE_SCORE: 85,
 };

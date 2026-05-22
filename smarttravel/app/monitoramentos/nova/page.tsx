@@ -15,6 +15,7 @@ type FormState = {
   passengers: string;
   max_points: string;
   monitor_frequency: string;
+  notes: string;
 };
 
 const EMPTY: FormState = {
@@ -26,6 +27,7 @@ const EMPTY: FormState = {
   passengers: "1",
   max_points: "",
   monitor_frequency: "1h",
+  notes: "",
 };
 
 export default function NovaRotaPage() {
@@ -176,6 +178,20 @@ export default function NovaRotaPage() {
             </option>
           ))}
         </SelectField>
+
+        <label className="block">
+          <span className="text-muted text-xs font-bold uppercase tracking-wider mb-1.5 block px-1">
+            Observações (opcional)
+          </span>
+          <textarea
+            name="notes"
+            rows={2}
+            value={form.notes}
+            onChange={(e) => update("notes", e.target.value)}
+            placeholder="Ex: voo direto preferível, evitar conexão em GIG"
+            className="w-full rounded-2xl bg-card2 border border-white/10 px-4 py-3 text-sm outline-none focus:border-turq/50 resize-none"
+          />
+        </label>
 
         <GradientButton type="submit" className="w-full mt-2">
           Criar rota
