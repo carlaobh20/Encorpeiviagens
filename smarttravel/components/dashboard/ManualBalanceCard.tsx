@@ -2,10 +2,12 @@ import Link from "next/link";
 import { GlassCard } from "@/components/ui/Card";
 import { GradientButton } from "@/components/ui/GradientButton";
 import { formatPoints, timeAgo } from "@/lib/utils";
-import type { LoyaltyAccount } from "@/lib/types";
+import type { UserProfile } from "@/lib/types";
 
-export function LoyaltyBalanceCard({ loyalty }: { loyalty: LoyaltyAccount | null }) {
-  const connected = loyalty?.session_status === "connected";
+export function ManualBalanceCard({ profile }: { profile: UserProfile | null }) {
+  const balance = profile?.latam_points_balance ?? 0;
+  const updatedAt = profile?.points_updated_at ?? null;
+  const hasBalance = balance > 0;
 
   return (
     <GlassCard className="mb-4">
@@ -16,37 +18,32 @@ export function LoyaltyBalanceCard({ loyalty }: { loyalty: LoyaltyAccount | null
         </div>
         <div>
           <div className="font-display text-sm font-bold">LATAM Pass</div>
-          <div className="text-muted text-xs font-semibold flex items-center gap-1.5">
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                connected ? "bg-opp shadow-[0_0_8px_#22C55E]" : "bg-muted/50"
-              }`}
-            />
-            {connected
-              ? `Sincronizado ${loyalty?.last_sync_at ? timeAgo(loyalty.last_sync_at) : "—"}`
-              : "Conta não conectada"}
+          <div className="text-muted text-xs font-semibold">
+            {hasBalance ? `Saldo informado ${updatedAt ? timeAgo(updatedAt) : "—"}` : "Saldo não informado"}
           </div>
         </div>
       </div>
 
-      {connected ? (
+      {hasBalance ? (
         <>
           <div className="font-display font-extrabold text-[44px] leading-none tracking-tighter my-3.5 bg-gradient-to-br from-white to-muted bg-clip-text text-transparent">
-            {formatPoints(loyalty!.points_balance)}
+            {formatPoints(balance)}
             <span className="text-lg text-muted ml-1.5">pts</span>
           </div>
-          <div className="text-muted text-xs font-semibold">Saldo informado por você</div>
+          <Link href="/conta">
+            <span className="text-tech text-[12.5px] font-bold">Atualizar saldo</span>
+          </Link>
         </>
       ) : (
         <>
-          <div className="font-display font-extrabold text-[28px] leading-tight mt-3 text-muted">
-            Sem saldo configurado
-          </div>
-          <p className="text-muted text-xs font-medium mt-2 leading-relaxed">
-            Conecte sua conta LATAM Pass pra ver seu saldo e receber alertas personalizados.
+          <p className="text-muted text-[13px] font-medium mt-3 leading-relaxed">
+            Informe seu saldo manualmente em <b>Conta</b> pra acompanhar aqui. O monitoramento de
+            preços funciona independente disso.
           </p>
           <Link href="/conta">
-            <GradientButton className="w-full mt-4 !text-[13px]">Conectar LATAM</GradientButton>
+            <GradientButton variant="ghost" className="w-full mt-3 !text-[13px]">
+              Ir para Conta
+            </GradientButton>
           </Link>
         </>
       )}
