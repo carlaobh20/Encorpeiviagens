@@ -1,5 +1,6 @@
 import { GlassCard, PremiumCard } from "@/components/ui/Card";
 import { GradientButton } from "@/components/ui/GradientButton";
+import { SignOutButton } from "@/components/auth/SignOutButton";
 import { MOCK_ACCOUNT } from "@/lib/mock-data";
 import { formatPoints, timeAgo } from "@/lib/utils";
 
@@ -42,10 +43,12 @@ export default function ContaPage() {
         </ul>
       </PremiumCard>
 
-      <PremiumCard>
+      <PremiumCard className="mb-4">
         <h3 className="font-display font-bold text-sm mb-1">Prefere não conectar?</h3>
         <p className="text-muted text-[13px] font-medium leading-relaxed">Você pode usar o SmartTravel monitorando rotas como visitante, sem login. Conectar a conta libera saldo real e alertas personalizados.</p>
       </PremiumCard>
+
+      <SignOutButton className="w-full" />
     </div>
   );
 }

@@ -26,17 +26,30 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const supabase = createClient();
+      const siteUrl =
+        process.env.NEXT_PUBLIC_SITE_URL ||
+        (typeof window !== "undefined" ? window.location.origin : "");
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: name } },
+        options: {
+          data: { full_name: name },
+          emailRedirectTo: `${siteUrl}/auth/callback`,
+        },
       });
       if (error) {
         setMsg({ type: "error", text: traduzErro(error.message) });
-      } else if (data.user) {
-        setMsg({ type: "ok", text: "Conta criada! Verifique seu e-mail para confirmar, depois faça login." });
-        setTimeout(() => router.push("/login"), 2500);
+        return;
       }
+      // Se a confirmação por e-mail está DESLIGADA no Supabase,
+      // a session já vem aqui → entra direto no app.
+      if (data.session) {
+        router.refresh();
+        router.push("/dashboard");
+        return;
+      }
+      // Caso contrário, manda pro login com aviso.
+      router.push("/login?registered=1");
     } catch {
       setMsg({ type: "error", text: "Algo deu errado. Tente novamente." });
     } finally {
@@ -49,20 +62,41 @@ export default function RegisterPage() {
       <h1 className="font-display text-3xl font-extrabold tracking-tight">Crie sua conta</h1>
       <p className="text-muted text-sm mt-2 mb-8">Comece a caçar oportunidades em minutos.</p>
       <div className="space-y-3">
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome completo"
-          className="w-full rounded-2xl bg-card2 border border-white/10 px-4 py-3.5 text-sm outline-none focus:border-turq/50" />
-        <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="E-mail"
-          className="w-full rounded-2xl bg-card2 border border-white/10 px-4 py-3.5 text-sm outline-none focus:border-turq/50" />
-        <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Senha (mín. 6 caracteres)"
-          className="w-full rounded-2xl bg-card2 border border-white/10 px-4 py-3.5 text-sm outline-none focus:border-turq/50" />
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Nome completo"
+          autoComplete="name"
+          className="w-full rounded-2xl bg-card2 border border-white/10 px-4 py-3.5 text-sm outline-none focus:border-turq/50"
+        />
+        <input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          type="email"
+          autoComplete="email"
+          placeholder="E-mail"
+          className="w-full rounded-2xl bg-card2 border border-white/10 px-4 py-3.5 text-sm outline-none focus:border-turq/50"
+        />
+        <input
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          type="password"
+          autoComplete="new-password"
+          placeholder="Senha (mín. 6 caracteres)"
+          className="w-full rounded-2xl bg-card2 border border-white/10 px-4 py-3.5 text-sm outline-none focus:border-turq/50"
+        />
         <GradientButton className="w-full" onClick={handleRegister} disabled={loading}>
           {loading ? "Criando…" : "Criar conta"}
         </GradientButton>
       </div>
       {msg && (
-        <p className={`text-sm mt-4 text-center ${msg.type === "error" ? "text-danger" : "text-opp"}`}>{msg.text}</p>
+        <p className={`text-sm mt-4 text-center ${msg.type === "error" ? "text-danger" : "text-opp"}`}>
+          {msg.text}
+        </p>
       )}
-      <p className="text-center text-muted text-sm mt-6">Já tem conta? <Link href="/login" className="text-turq font-semibold">Entrar</Link></p>
+      <p className="text-center text-muted text-sm mt-6">
+        Já tem conta? <Link href="/login" className="text-turq font-semibold">Entrar</Link>
+      </p>
     </div>
   );
 }
@@ -70,5 +104,6 @@ export default function RegisterPage() {
 function traduzErro(msg: string): string {
   if (msg.includes("already registered")) return "Esse e-mail já está cadastrado.";
   if (msg.includes("valid email")) return "Digite um e-mail válido.";
+  if (msg.toLowerCase().includes("password")) return "Senha inválida (mín. 6 caracteres).";
   return msg;
 }
