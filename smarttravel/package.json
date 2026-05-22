@@ -10,6 +10,7 @@
     "worker": "tsx server/workers/monitor.ts"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.45.4",
     "class-variance-authority": "^0.7.0",
