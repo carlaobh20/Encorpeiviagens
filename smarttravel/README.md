@@ -18,16 +18,32 @@ O SmartTravel busca voos em pontos via uma camada de **providers** plugáveis. M
 | Provider | Status | Quando usar |
 |---|---|---|
 | `mock` | Pronto | Default. Dados simulados realistas. App funciona ponta a ponta. |
-| `latam_web` | Iteração | Playwright direto no site público da LATAM. Rodar fora da Vercel. |
+| `latam_api` | Iteração | HTTP direto no BFF da LATAM. **Roda em Vercel/serverless**. |
+| `latam_web` | Iteração | Playwright no site público da LATAM. Precisa Chromium (Railway/Render/EC2). |
+| `latam` | Iteração | Orquestrador: tenta `api`, cai pro `web` se vazio (via `LATAM_MODE`). |
 | `manual` | Fallback | Não busca; espera entrada manual de preço. |
 
 Configure com a env `AWARD_PROVIDER`:
 
 ```bash
-AWARD_PROVIDER=mock        # default
-AWARD_PROVIDER=latam_web   # produção real (futuro)
-AWARD_PROVIDER=manual      # fallback
+AWARD_PROVIDER=mock        # default em dev
+AWARD_PROVIDER=latam_api   # produção em Vercel (HTTP direto)
+AWARD_PROVIDER=latam_web   # produção fora da Vercel (Playwright)
+AWARD_PROVIDER=latam       # auto (api → fallback browser); LATAM_MODE=api|browser|auto
+AWARD_PROVIDER=manual      # fallback sem busca
 ```
+
+**Testando o LATAM sem afetar o banco** — `POST /api/provider/probe` dispara
+a busca no provider atual e retorna o payload bruto:
+
+```bash
+curl -X POST https://seu-app.vercel.app/api/provider/probe \
+  -H 'content-type: application/json' \
+  -b 'sb-access-token=...' \
+  -d '{"origin":"GRU","destination":"LIS","departureDate":"2026-08-15","cabin":"executiva","passengers":1}'
+```
+
+Use `LATAM_DEBUG=true` pra logar o JSON bruto da LATAM no console (Vercel logs).
 
 ## Setup local
 
